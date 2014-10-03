@@ -1,0 +1,417 @@
+﻿<header>
+    <div class="content-wrapper">
+        <div class="float-left">
+            <p class="site-title">
+                <a href="~/">ASP.NET WEB API</a>
+            </p>
+        </div>
+    </div>    
+</header>
+<div id="body">
+    <h1>Courses:</h1>
+    <ol id="courses"></ol>
+</div>
+
+@section scripts
+{
+    <script>
+        $.ajax({
+            url: '/api/courses',
+            success: function(courses) {
+                var list = $('#courses');
+                for (var i = 0; i < courses.length; i++) {
+                    var course = courses[i];
+                    list.append('<li>' + course.title + '</li>');
+                }
+            }
+        });
+
+        // ------------------------------------------
+        // example 1: uses global variables (bad)
+        // ------------------------------------------
+
+        /*
+        var globalNames = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+
+        var digit_name = function (n)
+        {
+            return globalNames[n];
+        }
+
+        alert(digit_name(3));
+        */
+
+        // ------------------------------------------
+        // example 2: slow
+        // ------------------------------------------
+
+        /*
+        var digit_name = function(n) {
+            // names is a private variable within the function but is loaded each time it's called which is slow
+            var names = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+
+            return names[n];
+        }
+
+        alert(digit_name(2));
+        */
+
+        // ------------------------------------------
+        // example 3: using closures
+        // ------------------------------------------
+
+        var digit_name = (function ()
+        {
+            var names = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+
+            return function (n)
+            {
+                return names[n];
+            }
+        }());
+
+        //alert(digit_name(4));
+        //console.log(digit_name(5));
+        //console.log(digit_name(6));
+        //console.log(digit_name(7));
+
+        // ------------------------------------------
+        // example 4: Lazy! Don't do this!
+        // ------------------------------------------
+
+        //var digit_name = (function () {
+        //    var names = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+
+        //    digit_name = function(n) {
+        //        return names[n];
+        //    }
+
+        //    return digit_name(n);
+        //};
+
+        //alert(digit_name(5));
+
+        // ------------------------------------------
+        // Colour Fade on an element in the document
+        // ------------------------------------------
+
+        function fade(id)
+        {
+            var dom = document.getElementById(id);
+            var level = 1;
+
+            function step()
+            {
+                var h = level.toString(16);
+                //console.log('h - ' + h);
+                dom.style.backgroundColor = '#FFFF' + h + h;
+
+                if (level < 15)
+                {
+                    level += 1;
+                    setTimeout(step, 100);
+                }
+            }
+
+            setTimeout(step, 100);
+        }
+
+        this.fade('courses');
+
+        // ------------------------------------------
+        // Objects (Pseudoclassical Inheritance)
+        // ------------------------------------------
+
+        /*
+        function Gizmo(id)
+        {
+            this.id = id; // this is a constructor
+        }
+
+        Gizmo.prototype.toString = function ()
+        {
+            return "gizmo " + this.id;
+        }
+
+        function Hoozit(id)
+        {
+            this.id = id; // this is a constructor
+        }
+
+        Hoozit.prototype = new Gizmo();
+        Hoozit.prototype.test = function (id)
+        {
+            return this.id === id;
+        }
+        */
+
+        // ------------------------------------------
+        // Functional Inheritance
+        // ------------------------------------------
+
+        /*
+        function gizmo(id)
+        {
+            return {
+                id: id,
+                toString: function ()
+                {
+                     return "gizmo " + this.id;
+                }
+            }
+        }
+
+        function hoozit(id)
+        {
+            var that = gizmo(id);
+
+            that.test = function (testid)
+            {
+                 return testid === this.id;
+            };
+
+            return that;
+        }
+        */
+
+        // ------------------------------------------
+        // Functional Inheritance with Privacy of Id
+        // ------------------------------------------
+
+        function gizmo(id)
+        {
+            return {
+                toString: function () {
+                    return "gizmo " + id;
+                }
+            }
+        }
+
+        function hoozit(id)
+        {
+            var that = gizmo(id);
+
+            that.test = function (testid) {
+                return testid === id;
+            };
+
+            return that;
+        }
+
+        // ------------------------------------------
+        // Step One
+        // ------------------------------------------
+
+        //function myPowerConstructor(x) {
+        //    var that = otherMaker(x);
+        //}
+        
+        // ------------------------------------------
+        // Step Two
+        // ------------------------------------------
+
+        //function myPowerConstructor(x) {
+        //    var that = otherMaker(x);
+        //    var secret = f(x);
+        //}
+
+
+        // ------------------------------------------
+        // Step three - create privaledged functions
+        // ------------------------------------------
+
+        //function myPowerConstructor(x) {
+        //    var that = otherMaker(x);
+        //    var secret = f(x);
+        //    that.priv = function() {
+        //        /// ... secret x that ...
+        //    }
+        //}
+        
+        // ------------------------------------------
+        // step four: return that:
+        // ------------------------------------------
+
+        //function myPowerConstructor(x) {
+        //    var that = otherMaker(x);
+        //    var secret = f(x);
+        //    that.priv = function() {
+        //        /// ... secret x that ...
+        //    };
+
+        //    return that;
+        //}
+        
+        // ------------------------------------------
+        //  Memoizer (caching function that remembers values)
+        // ------------------------------------------
+
+        function memoizer(memo, formula)
+        {
+            var recur = function (n)
+            {
+                var result = memo[n];
+
+                console.log('n = ' + n + ' and memo[n] = ' + result);
+
+                if (typeof result !== 'number')
+                {
+                    result = formula(recur, n);
+                    memo[n] = result;
+                }
+                return result;
+            };
+
+            return recur;
+        }
+
+        var factorial = memoizer([1, 1], function(recur, n) { return n * recur(n - 1); });
+
+        //console.log('factorial(4) = ' + factorial(4));
+        //console.log('factorial(5) = ' + factorial(5));
+        //console.log('factorial(6) = ' + factorial(6));
+
+        var fibonacci = memoizer([0, 1], function (recur, n) { return recur(n - 1) + recur(n - 2); });
+
+        console.log('fibonacci(1) = ' + fibonacci(1));
+        console.log('fibonacci(2) = ' + fibonacci(2));
+        console.log('fibonacci(3) = ' + fibonacci(3));
+        console.log('fibonacci(4) = ' + fibonacci(4));
+        console.log('fibonacci(5) = ' + fibonacci(5));
+        console.log('fibonacci(6) = ' + fibonacci(6));
+
+        // ------------------------------------------
+        // 
+        // ------------------------------------------
+
+        function add(x, y)
+        {
+            return x + y;
+        }
+
+        console.log('x + y = ' + add(1, 2));
+
+
+
+
+        function addf(x) 
+        {
+            return function(y) 
+            {
+                return x + y;
+            }
+        }
+
+        var answer = addf(2)(3);
+        console.log('addf = ' + answer);
+
+        // write a function that takes a binary function, and makes it callable with 2 invocations:
+        // addf = applyf(add);
+        // addf(3)(4) // 7
+        // applyf(mul)(5)(6) // 30
+
+        function mul(x, y)
+        {
+            return x * y;
+        }
+
+        function applyf(binary)
+        {
+            return function (x)
+            {
+                return function (y)
+                {
+                    return binary(x, y);
+                }
+            }
+        }
+
+        //alert(applyf(mul)(5)(6));
+        
+        // ------------------------------------------
+        // write a function that takes a function and an argument and returns a function that can supply a second argument
+        // add3 = curry(add, 3;
+        // add3(4)            // 7
+        // curry(mul, 5)(6)   // 30
+        // ------------------------------------------
+
+        function curry(func, first)
+        {
+            return function (second)
+            {
+                return func(first, second);
+            }
+        }
+
+        add3 = curry(add, 3);
+        console.log('add3(4) = ' + add3(4));
+
+        console.log('curry(mul, 5)(6); = ' + curry(mul, 5)(6));
+
+
+        // ------------------------------------------
+        // Without writing any new functions, show three ways to create the increment function
+        // inc(5)       // 6
+        // inc(inct(5)) // 7
+        // ------------------------------------------
+
+        inc = curry(add, 1);
+
+        console.log('1: inc(5); = ' + inc(5));
+        console.log('1: inc(inc(5)); = ' + inc(inc(5)));
+
+        inc = applyf(add)(1);
+
+        console.log('2: inc(5); = ' + inc(5));
+        console.log('2: inc(inc(5)); = ' + inc(inc(5)));
+
+        inc = addf(1);
+
+        console.log('3: inc(5); = ' + inc(5));
+        console.log('3: inc(inc(5)); = ' + inc(inc(5)));
+
+        // ------------------------------------------
+        // Write Methodize, a function that converts a binary function to a method
+        // Number.prototype.add = methodize(add);
+        // (3).add(4)   // 7
+        // ------------------------------------------
+
+        function methodize(func) 
+        {
+            return function (x)
+            {
+                return func(x, this);
+            }
+        }
+
+        Number.prototype.add = methodize(add);
+
+        console.log('(3).add(4) = ' + (3).add(4));
+
+        var myNumber = 3;
+        console.log('myNumber.add(4) = ' + myNumber.add(4));
+
+        // ------------------------------------------
+        // write demethodize, a function that converts a method to a binary function
+        // demethodize(Number.prototype.add)(5,6)  // 11
+        // ------------------------------------------
+
+        function demethodize(func)
+        {
+            return function (x, y)
+            {
+                return func.call(x, y);
+            }
+        }
+
+        
+        console.log('demethodize(Number.prototype.add)(5, 6); = ' + demethodize(Number.prototype.add)(5, 6));
+        
+
+        // ------------------------------------------
+        // 
+        // ------------------------------------------
+
+
+    </script>   
+}
